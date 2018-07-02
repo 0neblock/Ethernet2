@@ -31,7 +31,8 @@ void W5500Class::init(uint8_t ss_pin)
 
   delay(1000);
   initSS();
-  SPI.begin();
+  
+//  SPI.begin();
   w5500.swReset();
   for (int i=0; i<MAX_SOCK_NUM; i++) {
     uint8_t cntl_byte = (0x0C + (i<<5));
