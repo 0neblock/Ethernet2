@@ -10,6 +10,7 @@
  
 #include "Ethernet2.h"
 #include "Dhcp.h"
+#include "ping.h"
 
 // XXX: don't make assumptions about the value of MAX_SOCK_NUM.
 uint8_t EthernetClass::_state[MAX_SOCK_NUM] = { 0, };
@@ -204,6 +205,10 @@ char* EthernetClass::dnsDomainName(){
 
 char* EthernetClass::hostName(){
     return _hostName;
+}
+
+int EthernetClass::pingAddress(uint8_t *addr){
+      return ping.ping_auto(addr);
 }
 
 EthernetClass Ethernet;

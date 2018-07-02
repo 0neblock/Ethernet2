@@ -16,7 +16,7 @@
 #include "EthernetClient.h"
 #include "EthernetServer.h"
 #include "Dhcp.h"
-
+#include "ping.h"
 
 
 class EthernetClass {
@@ -25,6 +25,7 @@ private:
   char* _dnsDomainName;
   char* _hostName;
   DhcpClass* _dhcp;
+  Pings ping;
 public:
   uint8_t w5500_cspin;
 
@@ -64,6 +65,8 @@ public:
   IPAddress dnsServerIP();
   char* dnsDomainName();
   char* hostName();
+    
+  int pingAddress(uint8_t *addr);
 
   friend class EthernetClient;
   friend class EthernetServer;
