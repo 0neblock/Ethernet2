@@ -166,6 +166,26 @@ IPAddress EthernetClient::remoteIP(){
   }
 }
 
+void EthernetClient::increaseTXBufferSize(uint16_t buffer_size){
+  if (_sock == MAX_SOCK_NUM) return;
+  setTXBuffer(_sock, buffer_size);
+}
+
+void EthernetClient::defaultTXBufferSize(){
+  if (_sock == MAX_SOCK_NUM) return;
+  setTXBuffer(_sock, 2048);
+}
+
+void EthernetClient::increaseRXBufferSize(uint16_t buffer_size){
+  if (_sock == MAX_SOCK_NUM) return;
+  setRXBuffer(_sock, buffer_size);
+}
+
+void EthernetClient::defaultRXBufferSize(){
+  if (_sock == MAX_SOCK_NUM) return;
+  setRXBuffer(_sock, 2048);
+}
+
 // the next function allows us to use the client returned by
 // EthernetServer::available() as the condition in an if-statement.
 

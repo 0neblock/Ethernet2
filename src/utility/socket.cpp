@@ -105,8 +105,8 @@ uint16_t send(SOCKET s, const uint8_t * buf, uint16_t len)
   uint16_t ret=0;
   uint16_t freesize=0;
 
-  if (len > w5500.SSIZE) 
-    ret = w5500.SSIZE; // check size not to exceed MAX size.
+  if (len > w5500.SSIZE[s]) 
+    ret = w5500.SSIZE[s]; // check size not to exceed MAX size.
   else 
     ret = len;
 
@@ -205,7 +205,7 @@ uint16_t sendto(SOCKET s, const uint8_t *buf, uint16_t len, uint8_t *addr, uint1
 {
   uint16_t ret=0;
 
-  if (len > w5500.SSIZE) ret = w5500.SSIZE; // check size not to exceed MAX size.
+  if (len > w5500.SSIZE[s]) ret = w5500.SSIZE[s]; // check size not to exceed MAX size.
   else ret = len;
 
   if
@@ -321,6 +321,27 @@ uint16_t recvfrom(SOCKET s, uint8_t *buf, uint16_t len, uint8_t *addr, uint16_t 
  */
 void flush(SOCKET s) {
   // TODO
+  int timeout = 2000;
+  unsigned long startTime = millis();
+
+  uint16_t freesize = 0;
+  do {
+
+    freesize = w5500.getTXFreeSize(s);
+
+  } while( freesize < w5500.SSIZE[s] && millis() - startTime < timeout );
+}
+
+void setTXBuffer(SOCKET s, uint8_t buffer_size){
+    uint8_t w5500_buffer_size = buffer_size / 2014;
+    w5500.writeSnTXBuf(s, w5500_buffer_size);
+    w5500.fillBufferSizes();
+}
+
+void setRXBuffer(SOCKET s, uint8_t buffer_size){
+    uint8_t w5500_buffer_size = buffer_size / 2014;
+    w5500.writeSnRXBuf(s, w5500_buffer_size);
+    w5500.fillBufferSizes();
 }
 
 uint16_t igmpsend(SOCKET s, const uint8_t * buf, uint16_t len)
@@ -328,8 +349,8 @@ uint16_t igmpsend(SOCKET s, const uint8_t * buf, uint16_t len)
   uint8_t status=0;
   uint16_t ret=0;
 
-  if (len > w5500.SSIZE) 
-    ret = w5500.SSIZE; // check size not to exceed MAX size.
+  if (len > w5500.SSIZE[s]) 
+    ret = w5500.SSIZE[s]; // check size not to exceed MAX size.
   else 
     ret = len;
 

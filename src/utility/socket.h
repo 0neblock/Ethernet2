@@ -21,6 +21,9 @@ extern uint16_t sendto(SOCKET s, const uint8_t * buf, uint16_t len, uint8_t * ad
 extern uint16_t recvfrom(SOCKET s, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port); // Receive data (UDP/IP RAW)
 extern void flush(SOCKET s); // Wait for transmission to complete
 
+extern void setTXBuffer(SOCKET s, uint8_t buffer_size);
+extern void setRXBuffer(SOCKET s, uint8_t buffer_size);
+
 extern uint16_t igmpsend(SOCKET s, const uint8_t * buf, uint16_t len);
 
 // Functions to allow buffered UDP send (i.e. where the UDP datagram is built up over a

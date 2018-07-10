@@ -26,6 +26,12 @@ public:
   virtual operator bool();
   virtual bool operator==(const EthernetClient&);
   virtual bool operator!=(const EthernetClient& rhs) { return !this->operator==(rhs); };
+
+  void increaseTXBufferSize(uint16_t);
+  void defaultTXBufferSize();
+
+  void increaseRXBufferSize(uint16_t);
+  void defaultRXBufferSize();
     
   IPAddress remoteIP();
 

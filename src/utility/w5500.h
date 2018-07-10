@@ -187,6 +187,7 @@ public:
   inline void setRetransmissionCount(uint8_t _retry);
 
   inline void swReset();
+  inline void fillBufferSizes();
 
   inline void setPHYCFGR(uint8_t _val);
   inline uint8_t getPHYCFGR();
@@ -314,6 +315,10 @@ public:
   __SOCKET_REGISTER8(SnPROTO,     0x0014)        // Protocol in IP RAW Mode
   __SOCKET_REGISTER8(SnTOS,       0x0015)        // IP TOS
   __SOCKET_REGISTER8(SnTTL,       0x0016)        // IP TTL
+
+  __SOCKET_REGISTER8(SnRXBuf,       0x001E)        // RX Buf Size
+  __SOCKET_REGISTER8(SnTXBuf,       0x001F)        // TX Buf size
+
   __SOCKET_REGISTER16(SnTX_FSR,   0x0020)        // TX Free Size
   __SOCKET_REGISTER16(SnTX_RD,    0x0022)        // TX Read Pointer
   __SOCKET_REGISTER16(SnTX_WR,    0x0024)        // TX Write Pointer
@@ -331,9 +336,10 @@ private:
   static const int SOCKETS = 8;
 
 public:
-  static const uint16_t SSIZE = 2048; // Max Tx buffer size
+  // static const uint16_t SSIZE = 2048; // Max Tx buffer size
+  static uint16_t SSIZE[SOCKETS];
 private:
-  static const uint16_t RSIZE = 2048; // Max Rx buffer size
+  static uint16_t RSIZE[SOCKETS]; // Max Rx buffer size
 
 private:
   // could do inline optimizations

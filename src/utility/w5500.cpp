@@ -38,7 +38,17 @@ void W5500Class::init(uint8_t ss_pin)
     uint8_t cntl_byte = (0x0C + (i<<5));
     write( 0x1E, cntl_byte, 2); //0x1E - Sn_RXBUF_SIZE
     write( 0x1F, cntl_byte, 2); //0x1F - Sn_TXBUF_SIZE
+
+    SSIZE[i] = readSnTXBuf(i) * 1024;
+    RSIZE[i] = readSnRXBuf(i) * 1024;
   }
+}
+
+void W5500Class::fillBufferSizes(){
+    for (int i=0; i<MAX_SOCK_NUM; i++) {
+        SSIZE[i] = readSnTXBuf(i) * 1024;
+        RSIZE[i] = readSnRXBuf(i) * 1024;
+    }
 }
 
 uint16_t W5500Class::getTXFreeSize(SOCKET s)
