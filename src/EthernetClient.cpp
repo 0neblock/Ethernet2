@@ -166,7 +166,7 @@ IPAddress EthernetClient::remoteIP(){
   }
 }
 
-void EthernetClient::increaseTXBufferSize(uint16_t buffer_size){
+void EthernetClient::setTXBufferSize(uint16_t buffer_size){
   if (_sock == MAX_SOCK_NUM) return;
   setTXBuffer(_sock, buffer_size);
 }
@@ -176,7 +176,7 @@ void EthernetClient::defaultTXBufferSize(){
   setTXBuffer(_sock, 2048);
 }
 
-void EthernetClient::increaseRXBufferSize(uint16_t buffer_size){
+void EthernetClient::setRXBufferSize(uint16_t buffer_size){
   if (_sock == MAX_SOCK_NUM) return;
   setRXBuffer(_sock, buffer_size);
 }

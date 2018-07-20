@@ -22,32 +22,28 @@
 W5500Class w5500;
 
 // SPI details
-SPISettings wiznet_SPI_settings(8000000, MSBFIRST, SPI_MODE0);
+SPISettings wiznet_SPI_settings(20000000, MSBFIRST, SPI_MODE0);
 uint8_t SPI_CS;
 
 void W5500Class::init(uint8_t ss_pin)
 {
   SPI_CS = ss_pin;
 
-  delay(1000);
   initSS();
   
-//  SPI.begin();
   w5500.swReset();
   for (int i=0; i<MAX_SOCK_NUM; i++) {
-    uint8_t cntl_byte = (0x0C + (i<<5));
-    write( 0x1E, cntl_byte, 2); //0x1E - Sn_RXBUF_SIZE
-    write( 0x1F, cntl_byte, 2); //0x1F - Sn_TXBUF_SIZE
-
-    SSIZE[i] = readSnTXBuf(i) * 1024;
-    RSIZE[i] = readSnRXBuf(i) * 1024;
+    writeSnTXBuf(i, 2);
+    writeSnRXBuf(i, 2);
   }
+  fillBufferSizes();
 }
 
 void W5500Class::fillBufferSizes(){
     for (int i=0; i<MAX_SOCK_NUM; i++) {
         SSIZE[i] = readSnTXBuf(i) * 1024;
         RSIZE[i] = readSnRXBuf(i) * 1024;
+        // Serial.printf("s:%d, TX:%d   RX:%d\n", i, SSIZE[i], RSIZE[i]);
     }
 }
 
@@ -132,9 +128,7 @@ uint16_t W5500Class::write(uint16_t _addr, uint8_t _cb, const uint8_t *_buf, uin
     SPI.transfer(_addr >> 8);
     SPI.transfer(_addr & 0xFF);
     SPI.transfer(_cb);
-    for (uint16_t i=0; i<_len; i++){
-        SPI.transfer(_buf[i]);
-    }
+    SPI.transferBytes((uint8_t *) _buf, NULL, _len);
     resetSS();
     SPI.endTransaction();
 
@@ -162,9 +156,7 @@ uint16_t W5500Class::read(uint16_t _addr, uint8_t _cb, uint8_t *_buf, uint16_t _
     SPI.transfer(_addr >> 8);
     SPI.transfer(_addr & 0xFF);
     SPI.transfer(_cb);
-    for (uint16_t i=0; i<_len; i++){
-        _buf[i] = SPI.transfer(0);
-    }
+    SPI.transferBytes(NULL, _buf, _len);
     resetSS();
     SPI.endTransaction();
 

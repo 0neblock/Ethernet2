@@ -187,7 +187,7 @@ public:
   inline void setRetransmissionCount(uint8_t _retry);
 
   inline void swReset();
-  inline void fillBufferSizes();
+  void fillBufferSizes();
 
   inline void setPHYCFGR(uint8_t _val);
   inline uint8_t getPHYCFGR();
@@ -337,9 +337,9 @@ private:
 
 public:
   // static const uint16_t SSIZE = 2048; // Max Tx buffer size
-  static uint16_t SSIZE[SOCKETS];
+  uint16_t SSIZE[SOCKETS];
 private:
-  static uint16_t RSIZE[SOCKETS]; // Max Rx buffer size
+  uint16_t RSIZE[SOCKETS]; // Max Rx buffer size
 
 private:
   // could do inline optimizations

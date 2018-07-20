@@ -326,20 +326,26 @@ void flush(SOCKET s) {
 
   uint16_t freesize = 0;
   do {
-
     freesize = w5500.getTXFreeSize(s);
 
+    if ( w5500.readSnSR(s) == SnSR::CLOSED )
+    {
+      close(s);
+      return;
+    }
   } while( freesize < w5500.SSIZE[s] && millis() - startTime < timeout );
 }
 
-void setTXBuffer(SOCKET s, uint8_t buffer_size){
-    uint8_t w5500_buffer_size = buffer_size / 2014;
+void setTXBuffer(SOCKET s, uint16_t buffer_size){
+    uint8_t w5500_buffer_size = buffer_size / 1024;
+    Serial.printf("Setting s:%d tx buffer to:%d\n", s, w5500_buffer_size);
     w5500.writeSnTXBuf(s, w5500_buffer_size);
     w5500.fillBufferSizes();
 }
 
-void setRXBuffer(SOCKET s, uint8_t buffer_size){
-    uint8_t w5500_buffer_size = buffer_size / 2014;
+void setRXBuffer(SOCKET s, uint16_t buffer_size){
+    uint8_t w5500_buffer_size = buffer_size / 1024;
+    Serial.printf("Setting s:%d rx buffer to:%d\n", s, w5500_buffer_size);
     w5500.writeSnRXBuf(s, w5500_buffer_size);
     w5500.fillBufferSizes();
 }
