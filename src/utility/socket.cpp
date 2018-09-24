@@ -226,8 +226,10 @@ uint16_t sendto(SOCKET s, const uint8_t *buf, uint16_t len, uint8_t *addr, uint1
     w5500.send_data_processing(s, (uint8_t *)buf, ret);
     w5500.execCmdSn(s, Sock_SEND);
 
+    unsigned long start = millis();
+
     /* +2008.01 bj */
-    while ( (w5500.readSnIR(s) & SnIR::SEND_OK) != SnIR::SEND_OK ) 
+    while ( (w5500.readSnIR(s) & SnIR::SEND_OK) != SnIR::SEND_OK && millis() - start < 1000) 
     {
       if (w5500.readSnIR(s) & SnIR::TIMEOUT)
       {

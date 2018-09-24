@@ -59,9 +59,11 @@ int EthernetClient::connect(IPAddress ip, uint16_t port) {
     return 0;
   }
 
+  unsigned long start = millis();
+
   while (status() != SnSR::ESTABLISHED) {
     delay(1);
-    if (status() == SnSR::CLOSED) {
+    if (status() == SnSR::CLOSED || millis() - start > 5000) {
       _sock = MAX_SOCK_NUM;
       return 0;
     }

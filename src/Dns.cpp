@@ -138,11 +138,13 @@ int DNSClient::getHostByName(const char* aHostname, IPAddress& aResult)
         // Try up to three times
         int retries = 0;
 //        while ((retries < 3) && (ret <= 0))
-        {
+        { 
+            Serial.printf("Getting host: %s\n", aHostname);
             // Send DNS request
             ret = iUdp.beginPacket(iDNSServer, DNS_PORT);
             if (ret != 0)
             {
+
                 // Now output the request data
                 ret = BuildRequest(aHostname);
                 if (ret != 0)
@@ -162,6 +164,7 @@ int DNSClient::getHostByName(const char* aHostname, IPAddress& aResult)
                     }
                 }
             }
+
             retries++;
         }
 
@@ -254,15 +257,22 @@ uint16_t DNSClient::BuildRequest(const char* aName)
 
 uint16_t DNSClient::ProcessResponse(uint16_t aTimeout, IPAddress& aAddress)
 {
+    Serial.printf("Procesing request");
     uint32_t startTime = millis();
 
     // Wait for a response packet
     while(iUdp.parsePacket() <= 0)
     {
-        if((millis() - startTime) > aTimeout)
+        if((millis() - startTime) > aTimeout){
+            Serial.printf("Timed out");
+            
             return TIMED_OUT;
+
+        }
         delay(50);
     }
+    // delay(500);
+    // Serial.println("1");
 
     // We've had a reply!
     // Read the UDP header
@@ -275,12 +285,18 @@ uint16_t DNSClient::ProcessResponse(uint16_t aTimeout, IPAddress& aAddress)
         return INVALID_SERVER;
     }
 
+    // Serial.println("2");
+
+
     // Read through the rest of the response
     if (iUdp.available() < DNS_HEADER_SIZE)
     {
         return TRUNCATED;
     }
     iUdp.read(header, DNS_HEADER_SIZE);
+
+    // Serial.println("3");
+
 
     uint16_t header_flags = htons(*((uint16_t*)&header[2]));
     // Check that it's a response to this request
@@ -308,6 +324,9 @@ uint16_t DNSClient::ProcessResponse(uint16_t aTimeout, IPAddress& aAddress)
         iUdp.flush();
         return -6; //INVALID_RESPONSE;
     }
+
+    // Serial.println("4");
+
 
     // Skip over any questions
     for (uint16_t i =0; i < htons(*((uint16_t*)&header[4])); i++)
@@ -376,11 +395,26 @@ uint16_t DNSClient::ProcessResponse(uint16_t aTimeout, IPAddress& aAddress)
             }
         } while (len != 0);
 
+        // Serial.printf("UDP Available: %d\n", iUdp.available());
+        // while(iUdp.available()){
+            // Serial.println(iUdp.peek(), HEX);
+        // }
         // Check the type and class
         uint16_t answerType;
-        uint16_t answerClass;
-        iUdp.read((uint8_t*)&answerType, sizeof(answerType));
-        iUdp.read((uint8_t*)&answerClass, sizeof(answerClass));
+        uint16_t answerClass; 
+        answerType = iUdp.read() << 8;
+        answerType |= iUdp.read();
+
+        answerClass = iUdp.read() << 8;
+        answerClass |= iUdp.read();
+
+        // iUdp.read((uint8_t*)&answerType, sizeof(answerType));
+        // iUdp.read((uint8_t*)&answerClass, sizeof(answerClass));
+
+        // Serial.println("sup");
+
+        // Serial.println(answerType, HEX);
+        // return -1;
 
         // Ignore the Time-To-Live as we don't do any caching
         for (int i =0; i < TTL_SIZE; i++)
@@ -391,8 +425,9 @@ uint16_t DNSClient::ProcessResponse(uint16_t aTimeout, IPAddress& aAddress)
         // And read out the length of this answer
         // Don't need header_flags anymore, so we can reuse it here
         iUdp.read((uint8_t*)&header_flags, sizeof(header_flags));
+                // Serial.println(answerClass, HEX);
 
-        if ( (htons(answerType) == TYPE_A) && (htons(answerClass) == CLASS_IN) )
+        if ( (answerType == TYPE_A) && (answerClass == CLASS_IN) )
         {
             if (htons(header_flags) != 4)
             {
@@ -402,6 +437,7 @@ uint16_t DNSClient::ProcessResponse(uint16_t aTimeout, IPAddress& aAddress)
                 return -9;//INVALID_RESPONSE;
             }
             iUdp.read(aAddress.raw_address(), 4);
+            Serial.printf("GOT IP: %s", aAddress.toString().c_str());
             return SUCCESS;
         }
         else

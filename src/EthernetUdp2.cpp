@@ -59,6 +59,8 @@ uint8_t EthernetUDP::begin(uint16_t port) {
   _remaining = 0;
   socket(_sock, SnMR::UDP, _port, 0);
 
+  Serial.printf("Setting up socket: %d, to listen on: %u\n", _sock, port);
+
   return 1;
 }
 
@@ -75,7 +77,7 @@ void EthernetUDP::stop()
     return;
 
   close(_sock);
-
+  Serial.printf("sock: %d disconnecting\n", _sock);
   EthernetClass::_server_port[_sock] = 0;
   _sock = MAX_SOCK_NUM;
 }
@@ -88,6 +90,7 @@ int EthernetUDP::beginPacket(const char *host, uint16_t port)
   IPAddress remote_addr;
 
   dns.begin(Ethernet.dnsServerIP());
+  Serial.println(Ethernet.dnsServerIP());
   ret = dns.getHostByName(host, remote_addr);
   if (ret == 1) {
     return beginPacket(remote_addr, port);
@@ -99,6 +102,7 @@ int EthernetUDP::beginPacket(const char *host, uint16_t port)
 int EthernetUDP::beginPacket(IPAddress ip, uint16_t port)
 {
   _offset = 0;
+  Serial.printf("Sending on %d\n", _sock);
   return startUDP(_sock, rawIPAddress(ip), port);
 }
 
@@ -123,14 +127,16 @@ int EthernetUDP::parsePacket()
 {
   // discard any remaining bytes in the last packet
   flush();
-
+  // Serial.println("EthernetUDP.parsePacket()");
+  
   if (w5500.getRXReceivedSize(_sock) > 0)
   {
+    
     //HACK - hand-parse the UDP packet using TCP recv method
     uint8_t tmpBuf[8];
     int ret =0; 
     //read 8 header bytes and get IP and port from it
-    ret = recv(_sock,tmpBuf,8);
+    ret = recv(_sock, tmpBuf, 8);
     if (ret > 0)
     {
       _remoteIP = tmpBuf;
@@ -144,6 +150,9 @@ int EthernetUDP::parsePacket()
     }
     return ret;
   }
+    // Serial.printf("sock: %d nop", _sock);
+    
+
   // There aren't any packets available
   return 0;
 }
@@ -213,9 +222,10 @@ void EthernetUDP::flush()
   // could this fail (loop endlessly) if _remaining > 0 and recv in read fails?
   // should only occur if recv fails after telling us the data is there, lets
   // hope the w5500 always behaves :)
-
+  unsigned long start = millis();
   while (_remaining)
   {
+    if(millis() - start > 2000) return;
     read();
   }
 }
