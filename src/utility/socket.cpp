@@ -420,9 +420,11 @@ int startUDP(SOCKET s, uint8_t* addr, uint16_t port)
 int sendUDP(SOCKET s)
 {
   w5500.execCmdSn(s, Sock_SEND);
+
+  unsigned long start = millis();
 		
   /* +2008.01 bj */
-  while ( (w5500.readSnIR(s) & SnIR::SEND_OK) != SnIR::SEND_OK ) 
+  while ( (w5500.readSnIR(s) & SnIR::SEND_OK) != SnIR::SEND_OK && (millis() - start < 1000 && millis() > start)) 
   {
     if (w5500.readSnIR(s) & SnIR::TIMEOUT)
     {
