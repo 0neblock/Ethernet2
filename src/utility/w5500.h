@@ -187,6 +187,7 @@ public:
   inline void setRetransmissionCount(uint8_t _retry);
 
   inline void swReset();
+  inline void phyReset();
   void fillBufferSizes();
 
   inline void setPHYCFGR(uint8_t _val);
@@ -421,6 +422,12 @@ uint8_t W5500Class::getPHYCFGR() {
 
 void W5500Class::swReset() {
   writeMR( (readMR() | 0x80) );
+}
+
+void W5500Class::phyReset() {
+  w5500.setPHYCFGR(0b00110000);
+  w5500.setPHYCFGR(0b10111000);
+
 }
 
 #endif
